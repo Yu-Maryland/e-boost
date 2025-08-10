@@ -1,0 +1,10 @@
+total.lp
+target/
+smoothe_artifact/dataset_new2/set/retail.json
+smoothe_artifact/dataset_new2/boole
+smoothe_artifact/dataset/boole
+file/*
+!file/.gitkeep
+lplog/*
+!lplog/.gitkeep
+test/*

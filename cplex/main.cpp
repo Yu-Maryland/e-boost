@@ -1,7 +1,3 @@
-// clear;g++ -std=c++17 main.cpp -o cplex_solver -I/export/zhansong/concert/include -I/export/zhansong/cplex/include -L/export/zhansong/cplex/lib/x86-64_linux/static_pic -L/export/zhansong/concert/lib/x86-64_linux/static_pic -lilocplex -lcplex -lconcert -lpthread -ldl
-
-// clear;cplex/cplex_solver --lp_file file/lp/serialized_egraph_32_1.25.lp --output_file file/result/serialized_egraph_32_1.25_cplex.sol --log_file file/log/serialized_egraph_32_1.25_cplex.log --time_limit 50 --solution_pool_dir pool --mst_file file/start/serialized_egraph_32_1.25_cplex.mst
-
 #include <ilcplex/ilocplex.h>
 #include <ilconcert/ilomodel.h>
 #include <iostream>
@@ -16,7 +12,7 @@
 
 ILOSTLBEGIN
 
-// 辅助函数：生成解文件名
+// Helper function: generate solution file name
 std::string generateSolutionFileName(int solution_number, double objective_value, double time_seconds) {
     std::stringstream ss;
     ss << "solution_" << std::setw(5) << std::setfill('0') << solution_number 
@@ -25,7 +21,7 @@ std::string generateSolutionFileName(int solution_number, double objective_value
     return ss.str();
 }
 
-// 解析命令行参数
+// Parse command line arguments
 std::unordered_map<std::string, std::string> parseCommandLine(int argc, char* argv[]) {
     std::unordered_map<std::string, std::string> params;
     for (int i = 1; i < argc; i++) {
@@ -43,7 +39,7 @@ std::unordered_map<std::string, std::string> parseCommandLine(int argc, char* ar
     return params;
 }
 
-// CPLEX 回调：捕获每个新的 incumbent 解，记录日志（只记录改进解），同时在 solution_pool_dir 非空时保存当前解
+// CPLEX callback: capture each new incumbent solution, log only improved solutions, and save current solution when solution_pool_dir is not empty
 class MyIncumbentCallback : public IloCplex::IncumbentCallbackI {
 public:
     MyIncumbentCallback(IloEnv env,

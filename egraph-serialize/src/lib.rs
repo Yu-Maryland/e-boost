@@ -43,7 +43,7 @@ mod id_impls {
     
     impl std::fmt::Display for NodeId {
         fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-            // 以 "a.b" 的格式输出
+            // Output in "a.b" format
             write!(f, "{}.{}", self.0[0], self.0[1])
         }
     }
@@ -209,11 +209,11 @@ impl Data {
         let mut new_nodes = IndexMap::new();
         for (old_id, old_node) in data_old.nodes.into_iter() {
             let new_id = convert_nodeid_old(&old_id);
-            // 对于节点内部的 id，同样转换
+            // For internal node ids, convert them as well
             let new_node = Node {
                 op: old_node.op,
                 id: new_id.clone(),
-                children: old_node.children, // children 和 eclass 都保持不变
+                children: old_node.children, // children and eclass remain unchanged
                 eclass: old_node.eclass,
                 cost: old_node.cost,
             };
@@ -228,14 +228,14 @@ impl Data {
     }
 
     pub fn to_json_file(&self, path: impl AsRef<std::path::Path>) -> std::io::Result<()> {
-        // 遍历 self.nodes，将每个节点转换为旧格式
+        // Iterate through self.nodes, convert each node to old format
         let mut nodes_old = IndexMap::new();
         for (node_id, node) in &self.nodes {
             let old_id = convert_nodeid_to_old(node_id);
             let node_old = Node_old {
                 op: node.op.clone(),
-                id: old_id.clone(), // 同时转换节点内部的 id
-                children: node.children.clone(), // 其余字段保持不变
+                id: old_id.clone(), // Also convert internal node id
+                children: node.children.clone(), // Other fields remain unchanged
                 eclass: node.eclass.clone(),
                 cost: node.cost,
             };
@@ -245,7 +245,7 @@ impl Data {
             nodes: nodes_old,
             root_eclasses: self.root_eclasses.clone(),
         };
-        // 序列化为 JSON 字符串并写入文件
+        // Serialize to JSON string and write to file
         let new_file_content =
             serde_json::to_string_pretty(&data_old).expect("Unable to serialize JSON");
         println!("{}", path.as_ref().display());
@@ -255,12 +255,12 @@ impl Data {
 }
 
 fn convert_nodeid_to_old(node_id: &NodeId) -> NodeId_old {
-    // 使用 "a.b" 格式生成字符串，并包装成 Arc<str>
+    // Generate string using "a.b" format and wrap as Arc<str>
     NodeId_old(Arc::from(format!("{}.{}", node_id.0[0], node_id.0[1])))
 }
 
 fn convert_nodeid_old(old: &NodeId_old) -> NodeId {
-    // 假设 NodeId_old 内部存储的是形如 "a.b" 的字符串
+    // Assume NodeId_old internally stores strings in "a.b" format
     let s: &str = &old.0;
     let parts: Vec<&str> = s.split('.').collect();
     if parts.len() != 2 {

@@ -1,5 +1,5 @@
-// cargo run --release
-// cargo run -- --release --bound 1.25 --solver gurobi --timeout 1800 --extractor faster-greedy-dag-mt1 --pre 4 example.json
+// cargo build --release
+// cargo run -- --release --bound 1.25 --solver gurobi --timeout 1800 --extractor faster-greedy-dag-mt1 --pre 4 benchmark/BoolE/mul32_map.json
 
 
 
@@ -61,13 +61,13 @@ fn remove_redundant_nodes(data: &mut Data, cost_func: &str) {
             for elem in &children_hashes {
                 *freq_map.entry(elem).or_insert(0) += 1;
             }
-            // 2. 将 freq_map 转换成有序的 (String, usize) 向量
-            //    这里用 BTreeMap 能保证键按字典序排列。
+            // 2. Convert freq_map to ordered (String, usize) vector
+            //    Using BTreeMap here ensures keys are sorted in dictionary order.
             let freq_vec: Vec<(ClassId, usize)> = freq_map
             .into_iter()
             .map(|(elem, count)| (elem.clone(), count))
             .collect();
-            // 3. 根据 freq_vec 将 key 插入到对应分组
+            // 3. Insert key into corresponding group based on freq_vec
             grouped.entry(freq_vec).or_insert_with(Vec::new).push(node_id.clone());
         }
 
@@ -316,7 +316,7 @@ fn collect_results(cost: HashMap<NodeId,Cost>, bound:f32, zero_node: &mut Vec<No
     // assert!(bound >= 1.0);
     let mut collects: HashMap<u32, Vec<(NodeId, NotNan<f64>)>> = HashMap::new();
     
-    // 按类别收集节点
+    // Collect nodes by category
     for (node_id, cost) in cost.iter() {
         let classid = node_id.0[0];
         match collects.get_mut(&classid) {
@@ -329,18 +329,18 @@ fn collect_results(cost: HashMap<NodeId,Cost>, bound:f32, zero_node: &mut Vec<No
         }
     }
 
-    // 对每个类别处理
+    // Process each category
     for (_, costs) in collects.iter() {
         let mut sorted_costs = costs.clone();
-        // 按成本从小到大排序
+        // Sort by cost from smallest to largest
         sorted_costs.sort_by(|a, b| a.1.cmp(&b.1));
         
-        // 获取最小值并计算阈值
+        // Get minimum value and calculate threshold
         if let Some((_, min_cost)) = sorted_costs.first() {
-            // 计算阈值：最小值 * bound
-            let threshold = *min_cost * NotNan::new(bound as f64).expect("bound 不是 NaN");
+            // Calculate threshold: minimum value * bound
+            let threshold = *min_cost * NotNan::new(bound as f64).expect("bound is not NaN");
             
-            // 将大于阈值的节点添加到 zero_node
+            // Add nodes greater than threshold to zero_node
             for &(ref node_id, cost) in &sorted_costs {
                 if cost > threshold {
                     zero_node.push(node_id.clone());
@@ -668,6 +668,21 @@ fn main() {
         bound = -1.0;
     }
 
+    // Check if filename is provided
+    if filename.is_empty() {
+        eprintln!("Error: No input file specified");
+        eprintln!("Usage: {} [OPTIONS] <input.json>", args[0]);
+        eprintln!("Options:");
+        eprintln!("  --bound <value>      Bound value (default: 1.25)");
+        eprintln!("  --solver <name>      Solver: gurobi, cplex, or cpsat (default: gurobi)");
+        eprintln!("  --timeout <seconds>  Timeout in seconds (default: 1800)");
+        eprintln!("  --extractor <name>   Extractor name (default: faster-greedy-dag-mt1)");
+        eprintln!("  --pre <flag>         Pre-processing flag: 0-5 (default: 2)");
+        eprintln!("");
+        eprintln!("Example: {} --bound 1.1 --solver gurobi input.json", args[0]);
+        std::process::exit(1);
+    }
+
     let path = std::path::Path::new(&filename);
 
     let ext = path.extension()
@@ -717,29 +732,23 @@ fn main() {
     let mut runtime: f64 = 0.0;
     let mut total_egraph;
     
-    // Create necessary directories
-    fs::create_dir_all("file").unwrap_or_else(|_| {
-        eprintln!("Warning: Could not create 'lp' directory");
-    });
-
-    fs::create_dir_all("file/lp").unwrap_or_else(|_| {
-        eprintln!("Warning: Could not create 'lp' directory");
-    });
-    fs::create_dir_all("file/start").unwrap_or_else(|_| {
-        eprintln!("Warning: Could not create 'mst' directory");
-    });
-    fs::create_dir_all("file/ZeroNode").unwrap_or_else(|_| {
-        eprintln!("Warning: Could not create 'ZeroNode' directory");
-    });
-    fs::create_dir_all("file/result").unwrap_or_else(|_| {
-        eprintln!("Warning: Could not create 'result' directory");
-    });
-    fs::create_dir_all(pool.clone()).unwrap_or_else(|_| {
-        eprintln!("Warning: Could not create 'result' directory");
-    });
-    fs::create_dir_all("file/log").unwrap_or_else(|_| {
-        eprintln!("Warning: Could not create 'log' directory");
-    });
+    // Create all necessary directories
+    let directories = vec![
+        "file",
+        "file/lp",
+        "file/start", 
+        "file/ZeroNode",
+        "file/result",
+        "file/log",
+        "file/redundancy",
+        &pool,
+    ];
+    
+    for dir in directories {
+        fs::create_dir_all(dir).unwrap_or_else(|err| {
+            eprintln!("Warning: Could not create directory '{}': {}", dir, err);
+        });
+    }
 
     if pre_flag == 0 {
         println!("Skipping extraction phase (--pre=0 mode)");
@@ -1006,19 +1015,7 @@ fn main() {
 
 
         // Skip solution checking if we used an empty e-graph
-        if pre_flag != 0 {
-            let mut new_extraction_results = ExtractionResultttt::new_empty();
-            new_extraction_results.choices = ilp_solution.choices.clone();
-            write_json_result("/export2/zhansong/esyn2_main/E-syn2/extraction-gym/out_dag_json/rewritten_egraph_with_weight_cost_serd_faster-bottom-up2.json",&new_extraction_results);
-            ilp_solution.check(&total_egraph);
-            let tree = ilp_solution.tree_cost(&total_egraph, &total_egraph.root_eclasses);
-            let dag = ilp_solution.dag_cost(&total_egraph, &total_egraph.root_eclasses);
-            let depth = ilp_solution.depth_cost(&total_egraph, &total_egraph.root_eclasses);
-            println!("{:<18}: runtime-{} tree:{} dag:{} depth:{}", "ilp_solver", runtime_solve, tree, dag, depth);
-            // println!("{:<18}: runtime-{} tree:{} dag:{}", "ilp_solver", runtime, tree, dag);
-        } else {
-            println!("Solution found with solver: {}", solver);
-        }
+        println!("Solution found with solver: {}", solver);
     }
     
 

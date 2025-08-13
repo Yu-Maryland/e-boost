@@ -1,9 +1,4 @@
 // CpsatSolveOnly.cpp
-// 编译命令示例：
-// g++ -std=c++17 main.cpp -I./include -L /export/zhansong/or-tools/install/lib64 -Wl,-rpath=/export/zhansong/or-tools/install/lib64 -lortools -o cpsat -O3
-// 运行示例：
-// cpsat/cpsat --egraph_json_file smoothe_artifact/dataset_new2/boole/serialized_egraph_32.json --zero_node_mst file/ZeroNode/serialized_egraph_32_1.25_cpsat.mst --total_gurobi_mst file/start/serialized_egraph_32_1.25_cpsat.mst --output_sol_file file/result/serialized_egraph_32_1.25_cpsat.sol --time_limit 50 --solution_pool_dir pool --log_file file/log/serialized_egraph_32_1.25_cpsat.log
-
 #include "egraph_serialize.hpp"
 #include <cassert>
 #include "ortools/sat/cp_model.h"

@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package vectorservice;
+
+service VectorService {
+  rpc ProcessJson (JsonRequest) returns (VectorResponse) {}
+}
+
+message JsonRequest {
+  string json_data = 1;
+}
+
+message VectorResponse {
+  repeated double vector = 1;
+}

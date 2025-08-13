@@ -1,0 +1,15 @@
+[package]
+name = "grpc_communicator"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+tonic = "0.8"
+prost = "0.11"
+tokio = { version = "1.0", features = ["macros", "rt-multi-thread"] }
+serde_json = "1.0"
+
+[build-dependencies]
+tonic-build = "0.8"

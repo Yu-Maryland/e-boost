@@ -1,0 +1,1 @@
+# Collect data from training map-aware models

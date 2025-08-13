@@ -1,7 +1,3 @@
-// gurobi/gurobi_solver --lp_file file/lp/serialized_egraph_32_1.25.lp --output_file file/result/serialized_egraph_32_1.25_gurobi.sol --log_file file/log/serialized_egraph_32_1.25_gurobi.log --time_limit 50 --solution_pool_dir pool --mst_file file/start/serialized_egraph_32_1.25_gurobi.mst
-
-// g++ -std=c++17 main.cpp -o gurobi_solver -I$GUROBI_HOME/include -L$GUROBI_HOME/lib -lgurobi_c++ -lgurobi120
-
 #include <iostream>
 #include <string>
 #include <unordered_map>

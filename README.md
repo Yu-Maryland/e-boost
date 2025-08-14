@@ -1,27 +1,20 @@
-# Extraction Tool
+# E-boost: Boosted E-Graph Extraction with Adaptive Heuristics and Exact Solving
 
-A comprehensive optimization framework for logic synthesis using E-graphs and various solvers (Gurobi, CPLEX, CP-SAT). This tool provides optimal extraction from E-graphs and integrates with logic synthesis workflows for circuit optimization.
+E-graph extraction is a challenging NP-hard optimization problem that serves as the primary bottleneck in e-graph based applications. Traditional methods face a critical trade-off between speed and optimality.
 
-## Table of Contents
+E-boost bridges this gap through three key innovations: (1) **parallelized heuristic extraction** for efficient multi-threaded performance, (2) **adaptive search space pruning** to reduce solution space while preserving quality, and (3) **initialized exact solving** with warm-start ILP capabilities for faster convergence to optimal solutions.
 
-- [Overview](#overview)
-- [Prerequisites](#prerequisites)
-- [Installation & Environment Setup](#installation--environment-setup)
-- [Quick Start](#quick-start)
-- [Solver Usage](#solver-usage)
-- [E-syn2 Integration](#e-syn2-integration)
-- [Benchmarks](#benchmarks)
-- [Directory Structure](#directory-structure)
-- [Examples](#examples)
+---
 
 ## Overview
 
-The extraction tool consists of several components:
+E-boost consists of several key components:
 
-1. **Solver Backends**: Gurobi, CPLEX, and CP-SAT implementations for optimal E-graph extraction
-2. **E-syn2**: Complete logic synthesis optimization workflow
-3. **Benchmarks**: Test datasets for evaluation
-4. **Supporting Libraries**: E-graph serialization and utilities
+1. **Parallelized Heuristic Extraction**: Multi-threaded DAG cost computation with optimized data structures
+2. **Adaptive Search Space Pruning**: Parameterized threshold mechanism for candidate selection
+3. **Initialized Exact Solving**: ILP formulation with warm-start capabilities
+4. **Solver Backends**: Support for Gurobi, CPLEX, and CP-SAT solvers
+5. **Benchmark Suite**: Comprehensive test datasets for evaluation
 
 ## Prerequisites
 
@@ -34,22 +27,39 @@ The extraction tool consists of several components:
 
 ### Required Software
 - **Rust**: Latest stable version with Cargo
-- **Berkeley ABC**: Logic synthesis tool
 - **At least one solver**:
   - Gurobi Optimizer (commercial/academic license)
   - IBM CPLEX (commercial/academic license)
   - Google OR-Tools (free, includes CP-SAT)
 
+---
+
 ## Installation & Environment Setup
 
-### 1. Install Rust
+### 1. Install Required Rust Environment
+
+Make sure you have [Rust](https://www.rust-lang.org/tools/install) installed (recommended: stable toolchain):
 
 ```bash
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
-source ~/.cargo/env
 ```
 
-### 2. Solver Setup
+After installation, ensure `cargo` and `rustc` are in your PATH:
+
+```bash
+rustc --version
+cargo --version
+```
+
+### 2. Build E-boost
+
+Once Rust is installed, build E-boost:
+
+```bash
+cargo build --release
+```
+
+### 3. Solver Setup
 
 #### Gurobi Setup
 1. Download Gurobi from [gurobi.com](https://www.gurobi.com/)
@@ -90,7 +100,7 @@ source ~/.cargo/env
    export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:${ORTOOLS_HOME}/lib"
    ```
 
-### 3. Build the Project
+### 4. Build the Project
 
 #### Build Solvers
 ```bash
@@ -119,83 +129,97 @@ cd E-syn2/
 make
 ```
 
-## Quick Start
+---
 
-### Basic Solver Usage
+## Benchmarks
 
-1. **Prepare input files**: Ensure you have LP files (for Gurobi/CPLEX) or JSON files (for CP-SAT)
+The `benchmark/` directory contains test datasets organized by source:
 
-2. **Run Gurobi solver**:
-   ```bash
-   ./gurobi/gurobi_solver \
-       --lp_file input.lp \
-       --output_file result.sol \
-       --log_file optimization.log \
-       --time_limit 300
-   ```
+- **BoolE/**: BoolE benchmarks
+  - `mul32.json`, `mul32_map.json`: 32-bit multiplier
+  - `mul48.json`, `mul48_map.json`: 48-bit multiplier
 
-3. **Run CPLEX solver**:
-   ```bash
-   ./cplex/cplex_solver \
-       --lp_file input.lp \
-       --output_file result.sol \
-       --log_file optimization.log \
-       --time_limit 300
-   ```
+- **E-morphic/**: E-morphic benchmarks
+  - `adder.json`: Adder circuit
+  - `log2.json`: Logarithm computation
+  - `sin.json`: Sine function approximation
 
-4. **Run CP-SAT solver**:
-   ```bash
-   ./cpsat/cpsat \
-       --egraph_json_file input.json \
-       --output_sol_file result.sol \
-       --log_file optimization.log \
-       --time_limit 300
-   ```
+- **E-syn/**: E-Syn benchmarks
+  - `c2670.json`: ISCAS benchmark circuit
+  - `qdiv.json`: Quotient division circuit
 
-## Solver Usage
+- **SmootheE/**: SmootheE benchmarks
+  - `direct_recexpr_root_18.json`: Direct recursive expression
+  - `fir_8_tap_7iteration_egraph.json`: FIR filter
+  - `large_mul2048.json`: Large multiplier
+  - `nasneta.json`: Neural architecture search
+  - `vector_2d_conv_2x2_2x2_root_36.json`: 2D convolution
 
-### Command Line Parameters
+### Running Benchmarks
 
-#### Gurobi & CPLEX
-- `--lp_file <file>`: Input LP format file (required)
-- `--output_file <file>`: Output solution file (required)
-- `--log_file <file>`: Optimization log file (required)
-- `--mst_file <file>`: Warm start solution file (optional)
-- `--time_limit <seconds>`: Time limit in seconds (optional)
-- `--solution_pool_dir <dir>`: Directory to save all solutions (optional)
+E-boost provides flexible command-line options for different extraction scenarios. The basic command structure is:
 
-#### CP-SAT
-- `--egraph_json_file <file>`: Input E-graph JSON file (required)
-- `--output_sol_file <file>`: Output solution file (required)
-- `--log_file <file>`: Optimization log file (required)
-- `--zero_node_mst <file>`: Zero node constraints file (optional)
-- `--total_gurobi_mst <file>`: Warm start file (optional)
-- `--time_limit <seconds>`: Time limit in seconds (optional)
-- `--solution_pool_dir <dir>`: Directory to save all solutions (optional)
-
-### Output Formats
-
-All solvers produce solution files in the format:
-```
-variable_name value
-x_1_2 1.0
-x_2_3 0.0
-...
+```bash
+cargo run -- --bound <threshold> --solver <solver> --timeout <seconds> --extractor <algorithm> --pre <mode> <benchmark_file>
 ```
 
-Log files contain optimization progress:
+#### Command-Line Parameters
+
+- **`--bound <value>`**: Threshold parameter for adaptive search space pruning (e.g., 1.25)
+  - Values > 1.0 retain more candidates while increasing search space
+  - Lower values (closer to 1.0) are more aggressive in pruning
+  
+- **`--solver <name>`**: Choose optimization solver backend
+  - `gurobi`: Commercial solver (requires license)
+  - `cplex`: IBM CPLEX solver (requires license) 
+  - `cpsat`: Google OR-Tools CP-SAT (free)
+
+- **`--timeout <seconds>`**: Maximum execution time in seconds
+
+- **`--extractor <algorithm>`**: Heuristic extraction algorithm variant
+  - `faster-greedy-dag-mt1`: Multi-threaded parallelized extraction (recommended)
+  - `faster-greedy-dag-mt2`: Alternative multi-threaded variant
+  - `faster-greedy-dag`: Single-threaded version
+
+- **`--pre <mode>`**: Preprocessing and execution mode (0-5)
+  - `0`: Solver only (skip LP generation)
+  - `1`: Generate LP file only, no warm start
+  - `2`: Generate LP file only, with warm start (default)
+  - `3`: Full run without warm start
+  - `4`: Full run with warm start (recommended for best results)
+  - `5`: Heuristic extraction only
+
+#### Usage Examples
+
+**Basic optimization with warm start:**
+```bash
+cargo run -- --bound 1.25 --solver gurobi --timeout 1800 --extractor faster-greedy-dag-mt1 --pre 4 benchmark/BoolE/mul32_map.json
 ```
-time_seconds: objective_value
-0.15: 125.50
-0.23: 120.30
-...
+
+**Quick heuristic-only extraction:**
+```bash
+cargo run -- --bound 1.25 --solver gurobi --timeout 300 --extractor faster-greedy-dag-mt1 --pre 5 benchmark/BoolE/mul32.json
 ```
 
-## E-syn2 Integration
+**Generate optimization files without solving:**
+```bash
+cargo run -- --bound 1.50 --solver cplex --timeout 3600 --extractor faster-greedy-dag-mt1 --pre 2 benchmark/SmootheE/fir_8_tap_7iteration_egraph.json
+```
 
-E-syn2 provides a complete logic synthesis optimization workflow using the extraction tool.
+**Using free CP-SAT solver:**
+```bash
+cargo run -- --bound 1.25 --solver cpsat --timeout 1800 --extractor faster-greedy-dag-mt1 --pre 4 benchmark/E-syn/c2670.json
+```
 
-### Key Scripts
+---
+
+## Real-World Applications: E-syn2 Logic Synthesis Integration
+
+**Note**: Make sure you have built E-boost using `cargo build --release` before using the E-syn2 integration.
+
+E-boost demonstrates its practical impact through integration with E-syn2, a complete logic synthesis optimization workflow. This integration showcases how E-boost's optimal extraction capabilities significantly improve real-world circuit optimization tasks.
+
+### E-syn2 Scripts
 
 #### process_test.sh
 Automated batch processing script that runs optimization on all EQN files in the test directory.
@@ -222,124 +246,14 @@ cd E-syn2/
 ./run_test.sh
 ```
 
-**Interactive Parameters**:
-- **Iteration times**: Number of E-graph rewriting iterations (default: 30)
-- **Cost function**: 'area' or 'delay' (default: 'area')
-- **Extraction pattern**: 'faster-bottom-up' or 'random-based-faster-bottom-up' (default: 'faster-bottom-up')
-- **Extraction mode**: 'new' (external solver) or 'ori' (original extractor) (default: 'ori')
-- **Solver**: 'gurobi', 'cplex', or 'cpsat' (when using 'new' mode)
-- **Bound**: Cost bound for extraction (when using 'new' mode)
+### Integration Examples
 
-### Workflow Pipeline
-
-1. **Circuit Rewriting**: Convert EQN to E-graph and apply rewriting rules
-2. **DAG Extraction**: Extract optimal DAG from saturated E-graph
-3. **JSON Processing**: Process extraction results
-4. **Graph to Equation**: Convert back to EQN format
-5. **ABC Optimization**: Run Berkeley ABC for final optimization
-6. **Equivalence Checking**: Verify logical equivalence
-
-### Quick Examples
-
-**Area optimization with external solver**:
-```bash
-echo -e "5\narea\nfaster-bottom-up\nnew\n1.25\ngurobi\n" | bash run_test.sh
-```
-
-**Delay optimization with original extractor**:
-```bash
-echo -e "10\ndelay\nfaster-bottom-up\nori\n" | bash run_test.sh
-```
-
-**Randomized extraction**:
-```bash
-echo -e "30\narea\nrandom-based-faster-bottom-up\nori\n" | bash run_test.sh
-```
-
-## Benchmarks
-
-The `benchmark/` directory contains test datasets organized by source:
-
-- **BoolE/**: Boolean function benchmarks
-  - `mul32.json`, `mul32_map.json`: 32-bit multiplier
-  - `mul48.json`, `mul48_map.json`: 48-bit multiplier
-
-- **E-morphic/**: Morphic computing benchmarks
-  - `adder.json`: Adder circuit
-  - `log2.json`: Logarithm computation
-  - `sin.json`: Sine function approximation
-
-- **E-syn/**: Logic synthesis benchmarks
-  - `c2670.json`: ISCAS benchmark circuit
-  - `qdiv.json`: Quotient division circuit
-
-- **SmootheE/**: Advanced benchmarks
-  - `direct_recexpr_root_18.json`: Direct recursive expression
-  - `fir_8_tap_7iteration_egraph.json`: FIR filter
-  - `large_mul2048.json`: Large multiplier
-  - `nasneta.json`: Neural architecture search
-  - `vector_2d_conv_2x2_2x2_root_36.json`: 2D convolution
-
-### Running Benchmarks
+#### Example 1: Basic Circuit Optimization
 
 ```bash
-# Run specific benchmark with Gurobi
-./gurobi/gurobi_solver \
-    --lp_file benchmark/converted/mul32.lp \
-    --output_file results/mul32_gurobi.sol \
-    --log_file logs/mul32_gurobi.log \
-    --time_limit 300
+# First, ensure E-boost is built
+cargo build --release
 
-# Run E-syn2 on test circuits
-cd E-syn2/
-./process_test.sh  # Processes all test/*.eqn files
-```
-
-## Directory Structure
-
-```
-extraction-tool/
-├── benchmark/              # Test datasets
-│   ├── BoolE/             # Boolean function benchmarks
-│   ├── E-morphic/         # Morphic computing benchmarks
-│   ├── E-syn/             # Logic synthesis benchmarks
-│   └── SmootheE/          # Advanced benchmarks
-├── cplex/                 # CPLEX solver implementation
-│   ├── main.cpp           # CPLEX solver source
-│   └── cplex_solver       # Compiled binary
-├── cpsat/                 # CP-SAT solver implementation
-│   ├── main.cpp           # CP-SAT solver source
-│   ├── cpsat              # Compiled binary
-│   └── include/           # Headers for E-graph serialization
-├── gurobi/                # Gurobi solver implementation
-│   ├── main.cpp           # Gurobi solver source
-│   └── gurobi_solver      # Compiled binary
-├── E-syn2/                # Logic synthesis optimization workflow
-│   ├── process_test.sh    # Batch processing script
-│   ├── run_test.sh        # Interactive optimization script
-│   ├── Makefile           # Build configuration
-│   ├── abc/               # Berkeley ABC integration
-│   ├── e-rewriter/        # E-graph rewriting
-│   ├── extraction-gym/    # Extraction algorithms
-│   ├── process_json/      # JSON post-processing
-│   ├── graph2eqn/         # Graph to equation conversion
-│   └── test/              # Test EQN files
-├── egg/                   # E-graph utilities
-├── egraph-serialize/      # E-graph serialization library
-├── extraction_gym/        # Extraction gym library
-├── file/                  # Working directories
-│   ├── log/               # Log files
-│   ├── lp/                # LP input files
-│   ├── result/            # Solution files
-│   └── start/             # Warm start files
-└── src/                   # Main Rust sources
-```
-
-## Examples
-
-### Example 1: Basic Circuit Optimization
-
-```bash
 # Place your circuit in E-syn2/e-rewriter/circuit0.eqn
 cd E-syn2/
 cp test/adder.eqn e-rewriter/circuit0.eqn
@@ -348,9 +262,12 @@ cp test/adder.eqn e-rewriter/circuit0.eqn
 echo -e "5\narea\nfaster-bottom-up\nnew\n1.25\ngurobi\n" | bash run_test.sh
 ```
 
-### Example 2: Batch Processing
+#### Example 2: Batch Processing
 
 ```bash
+# First, ensure E-boost is built
+cargo build --release
+
 # Process all test circuits with multiple configurations
 cd E-syn2/
 ./process_test.sh
@@ -359,47 +276,8 @@ cd E-syn2/
 ls logs/
 # Output: adder/ bar/ c2670/ ... (one directory per circuit)
 ```
+---
 
-### Example 3: Compare Solvers
+## 📧 Contact
 
-```bash
-# Run same circuit with different solvers
-echo -e "5\narea\nfaster-bottom-up\nnew\n1.25\ngurobi\n" | bash run_test.sh
-echo -e "5\narea\nfaster-bottom-up\nnew\n1.25\ncplex\n" | bash run_test.sh
-echo -e "5\narea\nfaster-bottom-up\nnew\n1.25\ncpsat\n" | bash run_test.sh
-```
-
-### Example 4: Custom Benchmark
-
-```bash
-# Use CP-SAT with benchmark data
-./cpsat/cpsat \
-    --egraph_json_file benchmark/BoolE/mul32.json \
-    --output_sol_file results/mul32_cpsat.sol \
-    --log_file logs/mul32_cpsat.log \
-    --time_limit 600
-```
-
-## Troubleshooting
-
-### Common Issues
-
-1. **Solver not found**: Ensure environment variables are set and libraries are in PATH/LD_LIBRARY_PATH
-2. **License errors**: Verify solver licenses are properly installed
-3. **Compilation errors**: Check that all dependencies are installed and paths are correct
-4. **Permission denied**: Ensure scripts have execute permissions (`chmod +x script.sh`)
-
-### Debug Tips
-
-- Check solver logs for detailed error messages
-- Verify input file formats are correct
-- Ensure sufficient disk space for solution pools
-- Monitor memory usage for large instances
-
-### Support
-
-For issues related to:
-- **Gurobi**: Check [Gurobi documentation](https://www.gurobi.com/documentation/)
-- **CPLEX**: Refer to [IBM CPLEX documentation](https://www.ibm.com/docs/en/icos)
-- **OR-Tools**: See [Google OR-Tools documentation](https://developers.google.com/optimization)
-- **E-syn2**: Review script output and log files in `logs/` directory
+For questions or feedback, please open an issue in this repository.

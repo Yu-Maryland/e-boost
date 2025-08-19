@@ -1,12 +1,31 @@
-# E-boost: Boosted E-Graph Extraction with Adaptive Heuristics and Exact Solving
+# E-boost: Boosted E-Graph Extraction with Adaptive Heuristics and Exact Solving (ICCAD'25)
+
+[![arXiv](https://img.shields.io/badge/arXiv-2508.13020-b31b1b.svg)](https://arxiv.org/abs/2508.13020)
 
 E-graph extraction is a challenging NP-hard optimization problem that serves as the primary bottleneck in e-graph based applications. Traditional methods face a critical trade-off between speed and optimality.
 
-E-boost bridges this gap through three key innovations: (1) **parallelized heuristic extraction** for efficient multi-threaded performance, (2) **adaptive search space pruning** to reduce solution space while preserving quality, and (3) **initialized exact solving** with warm-start ILP capabilities for faster convergence to optimal solutions.
+E-boost bridges this gap through three key innovations: (1) **parallelized heuristic extraction** for efficient multi-threaded performance, (2) **adaptive search space pruning** to reduce solution space while preserving quality, and (3) **initialized exact solving** with warm-start ILP capabilities for faster convergence to optimal solutions, as described in our [ICCAD'25 paper](https://arxiv.org/abs/2508.13020).
 
 ---
 
-## Overview
+## 📄 Paper
+
+If you use E-boost in your research, please cite our paper:
+
+```bibtex
+@article{song2025eboost,
+  title={E-boost: Boosted E-Graph Extraction with Adaptive Heuristics and Exact Solving},
+  author={Song, Zhan and others},
+  journal={arXiv preprint arXiv:2508.13020},
+  year={2025}
+}
+```
+
+---
+
+## 🚀 Quick Start
+
+### Overview
 
 E-boost consists of several key components:
 
@@ -16,11 +35,12 @@ E-boost consists of several key components:
 4. **Solver Backends**: Support for Gurobi, CPLEX, and CP-SAT solvers
 5. **Benchmark Suite**: Comprehensive test datasets for evaluation
 
-## Prerequisites
+---
+
+## 📋 Prerequisites
 
 ### System Requirements
 - **Operating System**: Linux (tested on Linux x86_64)
-- **Shell**: tcsh (default shell support)
 - **Compiler**: GCC with C++17 support
 - **Build Tool**: Make
 - **Language Runtime**: Rust (for E-graph components)
@@ -34,7 +54,7 @@ E-boost consists of several key components:
 
 ---
 
-## Installation & Environment Setup
+## ⚙️ Installation & Environment Setup
 
 ### 1. Install Required Rust Environment
 
@@ -51,6 +71,8 @@ rustc --version
 cargo --version
 ```
 
+---
+
 ### 2. Build E-boost
 
 Once Rust is installed, build E-boost:
@@ -58,6 +80,8 @@ Once Rust is installed, build E-boost:
 ```bash
 cargo build --release
 ```
+
+---
 
 ### 3. Solver Setup
 
@@ -100,6 +124,8 @@ cargo build --release
    export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:${ORTOOLS_HOME}/lib"
    ```
 
+---
+
 ### 4. Build the Project
 
 #### Build Solvers
@@ -131,7 +157,7 @@ make
 
 ---
 
-## Benchmarks
+## 🧪 Benchmarks
 
 The `benchmark/` directory contains test datasets organized by source:
 
@@ -154,6 +180,10 @@ The `benchmark/` directory contains test datasets organized by source:
   - `large_mul2048.json`: Large multiplier
   - `nasneta.json`: Neural architecture search
   - `vector_2d_conv_2x2_2x2_root_36.json`: 2D convolution
+
+---
+
+## 🔧 Usage
 
 ### Running Benchmarks
 
@@ -213,7 +243,7 @@ cargo run -- --bound 1.25 --solver cpsat --timeout 1800 --extractor faster-greed
 
 ---
 
-## Real-World Applications: E-syn2 Logic Synthesis Integration
+## 🔧 Real-World Applications: E-syn2 Logic Synthesis Integration
 
 **Note**: Make sure you have built E-boost using `cargo build --release` before using the E-syn2 integration.
 
@@ -274,10 +304,21 @@ cd E-syn2/
 
 # Results will be in logs/ directory
 ls logs/
-# Output: adder/ bar/ c2670/ ... (one directory per circuit)
+# Output: # Output: adder/ bar/ c2670/ ... (one directory per circuit)
 ```
+
 ---
 
 ## 📧 Contact
 
-For questions or feedback, please open an issue in this repository.
+For questions or feedback, please reach out to the authors listed in the [paper](https://arxiv.org/abs/2508.13020) or open an issue in this repository.
+
+---
+
+## 📜 License
+
+This project is licensed under the MIT License.
+
+---
+
+Enjoy boosted E-graph extraction with E-boost!

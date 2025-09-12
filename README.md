@@ -132,7 +132,7 @@ cargo build --release
 ```bash
 # Build Gurobi solver
 cd gurobi/
-g++ -std=c++17 main.cpp -o gurobi_solver -I$GUROBI_HOME/include -L$GUROBI_HOME/lib -lgurobi_c++ -lgurobi120
+g++ -std=c++17 main.cpp -o gurobi_solver -I$GUROBI_HOME/include -L$GUROBI_HOME/lib -lgurobi_c++ -lgurobi120 -lstdc++fs
 
 # Build CPLEX solver  
 cd ../cplex/

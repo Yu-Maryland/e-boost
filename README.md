@@ -13,9 +13,9 @@ E-boost bridges this gap through three key innovations: (1) **parallelized heuri
 If you use E-boost in your research, please cite our paper:
 
 ```bibtex
-@article{song2025eboost,
-  title={E-boost: Boosted E-Graph Extraction with Adaptive Heuristics and Exact Solving},
-  author={Song, Zhan and others},
+@article{yin2025boost,
+  title={e-boost: Boosted E-Graph Extraction with Adaptive Heuristics and Exact Solving},
+  author={Yin, Jiaqi and Song, Zhan and Chen, Chen and Cai, Yaohui and Zhang, Zhiru and Yu, Cunxi},
   journal={arXiv preprint arXiv:2508.13020},
   year={2025}
 }

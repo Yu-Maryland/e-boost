@@ -10,7 +10,7 @@ E-boost bridges this gap through three key innovations: (1) **parallelized heuri
 
 ## 📄 Paper
 
-If you use E-boost in your research, please cite our paper:
+If you use e-boost in your research, please cite our paper:
 
 ```bibtex
 @article{yin2025boost,
@@ -75,7 +75,7 @@ cargo --version
 
 ### 2. Build E-boost
 
-Once Rust is installed, build E-boost:
+Once Rust is installed, build e-boost:
 
 ```bash
 cargo build --release
@@ -245,9 +245,9 @@ cargo run -- --bound 1.25 --solver cpsat --timeout 1800 --extractor faster-greed
 
 ## 🔧 Real-World Applications: E-syn2 Logic Synthesis Integration
 
-**Note**: Make sure you have built E-boost using `cargo build --release` before using the E-syn2 integration.
+**Note**: Make sure you have built e-boost using `cargo build --release` before using the E-syn2 integration.
 
-E-boost demonstrates its practical impact through integration with E-syn2, a complete logic synthesis optimization workflow. This integration showcases how E-boost's optimal extraction capabilities significantly improve real-world circuit optimization tasks.
+E-boost demonstrates its practical impact through integration with E-syn2, a complete logic synthesis optimization workflow. This integration showcases how e-boost's optimal extraction capabilities significantly improve real-world circuit optimization tasks.
 
 ### E-syn2 Scripts
 
@@ -281,7 +281,7 @@ cd E-syn2/
 #### Example 1: Basic Circuit Optimization
 
 ```bash
-# First, ensure E-boost is built
+# First, ensure e-boost is built
 cargo build --release
 
 # Place your circuit in E-syn2/e-rewriter/circuit0.eqn
@@ -295,7 +295,7 @@ echo -e "5\narea\nfaster-bottom-up\nnew\n1.25\ngurobi\n" | bash run_test.sh
 #### Example 2: Batch Processing
 
 ```bash
-# First, ensure E-boost is built
+# First, ensure e-boost is built
 cargo build --release
 
 # Process all test circuits with multiple configurations
@@ -321,4 +321,4 @@ This project is licensed under the MIT License.
 
 ---
 
-Enjoy boosted E-graph extraction with E-boost!
+Enjoy boosted E-graph extraction with e-boost!

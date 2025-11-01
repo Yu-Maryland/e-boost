@@ -162,8 +162,8 @@ make
 The `benchmark/` directory contains test datasets organized by source:
 
 - **BoolE/**: BoolE benchmarks
-  - `mul32.json`, `mul32_map.json`: 32-bit multiplier
-  - `mul48.json`, `mul48_map.json`: 48-bit multiplier
+  - `mul32.json`, `mul32_map.json`: 32-bit CSA multiplier
+  - `mul48.json`, `mul48_map.json`: 48-bit CSA multiplier
 
 - **E-morphic/**: E-morphic benchmarks
   - `adder.json`: Adder circuit
@@ -174,7 +174,7 @@ The `benchmark/` directory contains test datasets organized by source:
   - `c2670.json`: ISCAS benchmark circuit
   - `qdiv.json`: Quotient division circuit
 
-- **SmootheE/**: SmootheE benchmarks
+- **SmoothE/**: SmoothE benchmarks
   - `direct_recexpr_root_18.json`: Direct recursive expression
   - `fir_8_tap_7iteration_egraph.json`: FIR filter
   - `large_mul2048.json`: Large multiplier
@@ -182,6 +182,15 @@ The `benchmark/` directory contains test datasets organized by source:
   - `vector_2d_conv_2x2_2x2_root_36.json`: 2D convolution
 
 ---
+
+### Complete benchmarks
+
+Note: some benchmark files (particularly the large BoolE datasets) are too large to host directly in this GitHub repository. The complete benchmark collection is hosted on Hugging Face and can be found here:
+
+https://huggingface.co/datasets/SeaSkysz/eboost_dataset/tree/main
+
+You can download individual files from that page, or load the dataset programmatically using the Hugging Face `datasets` library (for example, `load_dataset("SeaSkysz/eboost_dataset")`).
+
 
 ## 🔧 Usage
 
@@ -233,7 +242,7 @@ cargo run -- --bound 1.25 --solver gurobi --timeout 300 --extractor faster-greed
 
 **Generate optimization files without solving:**
 ```bash
-cargo run -- --bound 1.50 --solver cplex --timeout 3600 --extractor faster-greedy-dag-mt1 --pre 2 benchmark/SmootheE/fir_8_tap_7iteration_egraph.json
+cargo run -- --bound 1.50 --solver cplex --timeout 3600 --extractor faster-greedy-dag-mt1 --pre 2 benchmark/SmoothE/fir_8_tap_7iteration_egraph.json
 ```
 
 **Using free CP-SAT solver:**

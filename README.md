@@ -1,4 +1,4 @@
-# E-boost: Boosted E-Graph Extraction with Adaptive Heuristics and Exact Solving (ICCAD'25)
+# E-boost: Boosted E-Graph Extraction with Adaptive Heuristics and Exact Solving (ICCAD'25; Best Paper Nomination)
 
 [![arXiv](https://img.shields.io/badge/arXiv-2508.13020-b31b1b.svg)](https://arxiv.org/abs/2508.13020)
 
